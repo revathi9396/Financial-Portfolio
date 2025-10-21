@@ -1,0 +1,114 @@
+<div class="dashboard container">
+  <div class="header-row">
+    <div>
+      <h1>{{ title }}</h1>
+      <div class="muted">Overview of your portfolio</div>
+    </div>
+    <div class="metrics">
+      <div class="metric">
+        <div class="label">Portfolio Value</div>
+        <div class="value">{{ portfolioValue | number:'1.0-2' }}</div>
+      </div>
+      <div class="metric">
+        <div class="label">Holdings</div>
+        <div class="value">{{ investments.length }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <section class="card chart">
+      <div class="card-title">Performance (last 7 days)</div>
+      <svg width="100%" viewBox="0 0 300 70" preserveAspectRatio="none" role="img">
+        <path [attr.d]="getSparklinePath()" stroke="#007bff" stroke-width="2" fill="none"></path>
+      </svg>
+      <div class="legend">
+        <small *ngFor="let p of dailyPerformance">{{ p.date }}: {{ p.value }}</small>
+      </div>
+    </section>
+
+    <section class="card allocation">
+      <div class="card-title">Asset Allocation</div>
+      <div class="alloc-list">
+        <div *ngFor="let g of allocationGroups" class="alloc-row">
+          <div class="alloc-name">{{ g.key }}</div>
+          <div class="alloc-bar">
+            <div class="alloc-fill" [style.width.%]="g.percent"></div>
+          </div>
+          <div class="alloc-value">{{ g.total | number:'1.0-2' }}</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card form">
+      <div class="card-title">Add Investment</div>
+
+      <form [formGroup]="investmentForm" (ngSubmit)="addInvestment()">
+        <label>Asset Type
+          <input formControlName="assetType" />
+        </label>
+        <div class="error"
+          *ngIf="investmentForm.controls.assetType.touched && investmentForm.controls.assetType.invalid">Asset type is
+          required</div>
+
+        <label>Quantity
+          <input type="number" step="any" formControlName="quantity" />
+        </label>
+        <div class="error" *ngIf="investmentForm.controls.quantity.touched && investmentForm.controls.quantity.invalid">
+          Enter a valid quantity</div>
+
+        <label>Purchase Price
+          <input type="number" step="any" formControlName="purchasePrice" />
+        </label>
+        <div class="error"
+          *ngIf="investmentForm.controls.purchasePrice.touched && investmentForm.controls.purchasePrice.invalid">Enter a
+          valid price</div>
+
+        <label>Purchase Date
+          <input type="date" formControlName="purchaseDate" />
+        </label>
+        <div class="error"
+          *ngIf="investmentForm.controls.purchaseDate.touched && investmentForm.controls.purchaseDate.invalid">Date is
+          required</div>
+
+        <div class="form-actions">
+          <button type="submit" class="button button-primary">Review</button>
+        </div>
+      </form>
+
+      <div *ngIf="review" class="review">
+        <h4>Review Investment</h4>
+        <pre>{{ review | json }}</pre>
+        <div class="review-actions">
+          <button (click)="confirmAdd()" class="button button-primary">Confirm</button>
+          <button (click)="cancelReview()" class="button">Cancel</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="card holdings">
+    <div class="card-title">Holdings</div>
+    <table class="holdings-table">
+      <thead>
+        <tr>
+          <th>Asset</th>
+          <th>Qty</th>
+          <th>Price</th>
+          <th>Value</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let inv of investments">
+          <td>{{ inv.assetType }}</td>
+          <td>{{ inv.quantity }}</td>
+          <td>{{ inv.purchasePrice }}</td>
+          <td>{{ (inv.quantity * inv.purchasePrice) | number:'1.0-2' }}</td>
+          <td>{{ inv.purchaseDate }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+</div>
